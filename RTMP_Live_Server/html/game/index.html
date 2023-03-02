@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset = "utf-8"/>
+    <script src="./jquery-3.6.0.js"></script>
+    <script src="./game.js"></script>
+    <script src="prali.js"></script>
+    <style type="text/css">
+        @font-face {
+            font-family: eva;
+            src: url("../eva.ttf");
+        }
+    </style>
+    <title>Welcome!</title>
+</head>
+<body style="margin: 0; border: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;">
+    <div id="no_js">
+        您的浏览器竟然不允许Javascript的运行!
+    </div>
+    <script id="no_js_script">
+        $("#no_js").detach();
+        $("#no_js_script").detach();
+    </script>
+    
+    <canvas id="canvas" style="margin: 0; border: 0; padding: 0; width: 100%; height: 100%;" width="1440" height="720">您的浏览器竟然不支持Canvas标签!</canvas>
+    <script>
+        let context;
+        $(function() {
+
+            function parseDimension(dimension) {
+                return parseInt(dimension.substr(0, dimension.length - 2));
+            };
+
+            context = document.getElementById("canvas").getContext("2d");
+            $("#canvas").attr("width", $("#canvas").css("width")).attr("height", window.innerHeight);
+            let size = [parseDimension($("#canvas").css("width")), window.innerHeight];
+        
+            let loadList = [
+                //["barrelImage", "barrel.png"],
+            ];
+            let loaded = 0;
+        
+            function loadNext(initGame) {
+                if (loaded == loadList.length) {
+                    initGame();
+                    return;
+                }
+                publics[loadList[loaded][0]] = new Image();
+                publics[loadList[loaded][0]].src = loadList[loaded][1];
+                publics[loadList[loaded][0]].onload = function() {
+                    loaded++;
+                    loadNext(initGame);
+                };
+            }
+
+            $("#canvas").mousemove(function(event) {
+                publics["mouseX"] = event.offsetX;
+                publics["mouseY"] = event.offsetY;
+            });
+            loadNext(function() {
+                game.create();
+                $(document).keydown(function(event) {
+                    game.keyDown(event, context, size);
+                });
+                $(document).keyup(function(event) {
+                    game.keyUp(event, context, size);
+                });
+                $(document).mousedown(function(event) {
+                    game.mouseDown(context, size);
+                });
+                $(document).mouseup(function(event) {
+                    game.mouseUp(context, size);
+                });
+                game.start(context, size);
+                setInterval(function() {
+                    game.render(context, size)
+                }, 16.67);
+            });
+        });
+    </script>
+</body>
+</html>
